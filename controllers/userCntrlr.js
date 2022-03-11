@@ -87,6 +87,16 @@ const userCntrlr = {
       return res.status(500).json({ msg: err.message });
     }
   },
+
+  // get user profile
+  getProfile: async (req, res) => {
+    try {
+      const profile = await Users.findById(req.user.id).select("-password");
+      res.json({ profile });
+    } catch (error) {
+      return res.status(500).json({ msg: err.message });
+    }
+  },
   // Refresh token
   refreshToken: (req, res) => {
     try {
