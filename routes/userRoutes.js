@@ -12,6 +12,9 @@ router.put("/edit/:id", userCntrlr.editUser);
 // Delete a user
 router.delete("/delete/:id", userCntrlr.deleteUser);
 
+// Signin router
+router.post("/signin", userCntrlr.signIn);
+
 // Refresh token
 router.get("/refresh_token", userCntrlr.refreshToken);
 

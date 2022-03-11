@@ -39,7 +39,7 @@ const userCntrlr = {
         path: "/edp/users/refresh_token",
       });
 
-      res.json({ msg: "Signup succeed!" });
+      res.json({ token: { accesstoken, refreshtoken } });
     } catch (error) {
       return res.status(500).json({ msg: error.message });
     }
@@ -60,22 +60,50 @@ const userCntrlr = {
     res.json({ msg: "User deleted!" });
   },
 
+  // Signin
+  signIn: async (req, res) => {
+    try {
+      const { email, password } = req.body;
+
+      const user = await Users.findOne({ email });
+      if (!user) res.status(500).json({ msg: "User doesn't exist!" });
+
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      if (!passwordMatch)
+        return res.status(400).json({ msg: "Invalid credintials!" });
+
+      // If login success , create access token and refresh token
+      const accesstoken = createAccessToken({ id: user._id });
+      const refreshtoken = createRefreshToken({ id: user._id });
+
+      res.cookie("refreshtoken", refreshtoken, {
+        httpOnly: true,
+        path: "/user/refresh_token",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7d
+      });
+
+      res.json({ token: { accesstoken, refreshtoken } });
+    } catch (error) {
+      return res.status(500).json({ msg: err.message });
+    }
+  },
+  // Refresh token
   refreshToken: (req, res) => {
     try {
       const rf_token = req.cookies.refreshtoken;
       if (!rf_token)
         return res.status(400).json({ msg: "Please Login or Register" });
 
-      jwt.verify(rf_token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-        if (err)
+      jwt.verify(rf_token, process.env.REFRESH_TOKEN_SECRET, (error, user) => {
+        if (error)
           return res.status(400).json({ msg: "Please Login or Register" });
 
         const accesstoken = createAccessToken({ id: user.id });
 
         res.json({ accesstoken });
       });
-    } catch (err) {
-      return res.status(500).json({ msg: err.message });
+    } catch (error) {
+      return res.status(500).json({ msg: error.message });
     }
   },
 };
