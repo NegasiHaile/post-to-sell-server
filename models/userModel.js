@@ -34,8 +34,17 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
+      trim: true,
+    },
+    contacts: {
+      type: Array,
+      required: true,
+    },
+    accountStatus: {
+      type: String, // Values: unverified, verified, blocked
       required: true,
       trim: true,
+      default: "unverified",
     },
   },
   {
