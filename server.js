@@ -30,8 +30,8 @@ mongoose.connect(
   }
 );
 
-// Routes, edp stands for endpoint
-app.use("/edp/users", require("./routes/userRoutes"));
+// Root APIs
+app.use("/api/users", require("./routes/userRoutes"));
 
 // define the server port
 const PORT = process.env.PORT || 5000;

@@ -38,6 +38,6 @@ router.put(
 router.put("/block_account/:id", Auth(["admin"]), userCntrlr.blockUserAccount);
 
 // Refresh token
-router.get("/refresh_token", Auth(["admin", "user"]), userCntrlr.refreshToken);
+router.get("/refresh_token", userCntrlr.refreshToken);
 
 module.exports = router;
