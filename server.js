@@ -32,6 +32,7 @@ mongoose.connect(
 
 // Root APIs
 app.use("/api/users", require("./routes/userRoutes"));
+app.use("/api/products", require("./routes/productRoutes"));
 
 // define the server port
 const PORT = process.env.PORT || 5000;

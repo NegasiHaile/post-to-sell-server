@@ -1,0 +1,55 @@
+const mongoose = require("mongoose");
+
+const productSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    category: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    subCategory: {
+      type: String,
+      trim: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
+    discription: {
+      type: String,
+      trim: true,
+    },
+    postType: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    images: {
+      type: Array,
+      required: true,
+    },
+    reactions: {
+      type: Array,
+      required: true,
+    },
+    rate: {
+      type: Number,
+      required: true,
+    },
+    postPayment: {
+      type: String,
+      required: true,
+      default: "1",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+module.exports = mongoose.model("products", productSchema);
