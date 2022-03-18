@@ -1,21 +1,16 @@
 require("dotenv").config();
 const express = require("express");
+const path = require("path");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const fileupload = require("express-fileupload");
 
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors());
-app.use(
-  fileupload({
-    useTempFiles: true,
-  })
-);
-
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Connect to mongodb
 const URI = process.env.MONGODB_URL;
 mongoose.connect(

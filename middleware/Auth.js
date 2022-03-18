@@ -3,7 +3,6 @@ const Users = require("../models/userModel");
 
 const checkPerimssion = async (perimssions, user) => {
   const profile = await Users.findById(user.id).select("-password");
-  console.log(profile);
   if (profile.accountStatus !== "ON") return false;
   return perimssions.includes(profile.role);
 };

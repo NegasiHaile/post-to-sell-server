@@ -142,7 +142,7 @@ const userCntrlr = {
           .status(400)
           .json({ msg: "You are not authorized to delete this user!" });
 
-      await Users.findByIdAndDelete(req.params.id);
+      await Users.findByIdAndDelete({ _id: req.params.id });
       res.json({ msg: "User has been deleted permanently!" });
     } catch (error) {
       return res.status(500).json({ msg: error.message });

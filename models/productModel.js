@@ -2,7 +2,11 @@ const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema(
   {
-    name: {
+    userId: {
+      type: String,
+      required: true,
+    },
+    productName: {
       type: String,
       required: true,
       trim: true,
@@ -35,11 +39,11 @@ const productSchema = new mongoose.Schema(
     },
     reactions: {
       type: Array,
-      required: true,
     },
     rate: {
       type: Number,
       required: true,
+      default: 0,
     },
     postPayment: {
       type: String,
