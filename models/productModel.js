@@ -37,6 +37,10 @@ const productSchema = new mongoose.Schema(
       type: Array,
       required: true,
     },
+    contacts: {
+      type: Array,
+      required: true,
+    },
     reactions: {
       type: Array,
     },
