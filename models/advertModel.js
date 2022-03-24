@@ -30,6 +30,11 @@ const addSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    advertPayment: {
+      type: Boolean,
+      required: true,
+      default: true,
+    },
   },
   { timestamps: true }
 );
