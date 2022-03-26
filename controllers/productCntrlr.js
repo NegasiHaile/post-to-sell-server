@@ -8,13 +8,16 @@ const productCntrlr = {
       const files = req.files;
       if (files.length > 0 && files.length <= 5) {
         const {
-          userId,
           productName,
+          brand,
           category,
           subCategory,
           price,
+          currentPrice,
           discription,
           postType,
+          tag,
+          contacts,
         } = req.body;
 
         let imagesPath = [];
@@ -23,14 +26,18 @@ const productCntrlr = {
         });
 
         const newProduct = new Products({
-          userId,
+          userId: req.user.id,
           productName,
+          brand,
           category,
           subCategory,
           price,
+          currentPrice,
           discription,
           postType,
+          tag,
           images: imagesPath,
+          contacts,
         });
 
         await newProduct.save();
@@ -38,7 +45,7 @@ const productCntrlr = {
         res.json({ msg: "Product added successfuly!" });
       } else {
         res.status(400).json({
-          msg: "Upload images not less than 1 and not more than 5 items!",
+          msg: "Images must not less than 1 and not more than 5 items!",
         });
       }
     } catch (error) {
@@ -71,8 +78,18 @@ const productCntrlr = {
 
       await Products.findOneAndUpdate(
         { _id: req.params.id },
-        ({ productName, category, subCategory, price, discription, postType } =
-          req.body)
+        ({
+          productName,
+          brand,
+          category,
+          subCategory,
+          price,
+          currentPrice,
+          discription,
+          postType,
+          tag,
+          contacts,
+        } = req.body)
       );
       res.json({ msg: "Product edited successfully!" });
     } catch (error) {
