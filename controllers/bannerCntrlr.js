@@ -21,7 +21,7 @@ const bannerCntrlr = {
   },
   getAllBanners: async (req, res) => {
     try {
-      res.json(await Banners.find());
+      res.json(await Banners.find().sort({ sequence: 1 }));
     } catch (error) {
       res.status(500).json({ msg: error.message });
     }
