@@ -22,7 +22,7 @@ const productCntrlr = {
 
         let imagesPath = [];
         files.forEach((file) => {
-          imagesPath.push(file.filename);
+          imagesPath.push("uploads/products/" + file.filename);
         });
 
         const newProduct = new Products({
@@ -50,7 +50,7 @@ const productCntrlr = {
       }
     } catch (error) {
       req.files.forEach((file) => {
-        removeImage(file.filename);
+        removeImage("uploads/products/" + file.filename);
       });
       res.status(500).json({ msg: error.message });
     }
@@ -110,13 +110,13 @@ const productCntrlr = {
           { _id: req.params.id },
           {
             $push: {
-              images: req.file.filename,
+              images: "uploads/products/" + req.file.filename,
             },
           }
         );
         res.json({ msg: "Image uploaded successfully" });
       } else {
-        await removeImage(req.file.filename);
+        await removeImage("uploads/products/" + req.file.filename);
         return res.status(400).json({
           msg: "Only 5 images are allowed to upload, Please remove some images first!",
         });
@@ -133,7 +133,7 @@ const productCntrlr = {
         return res.status(400).json({ msg: "Perimission denied!" });
 
       const product = await Products.findById(req.params.id);
-      console.log(product);
+
       for (let i = 0; i < product.images.length; i++) {
         await removeImage(product.images[i]);
       }
@@ -150,21 +150,19 @@ const productCntrlr = {
       if (!validUser)
         return res.status(400).json({ msg: "Perimission denied!" });
       const product = await Products.findById(req.params.id);
-      if (!product.images.includes(req.params.image))
+      if (!product.images.includes(req.query.imagePath))
         return res.status(400).json({ msg: "Image not found!" });
-
       if (product.images.length > 1) {
-        fs.unlink("uploads/" + req.params.image, async (err) => {
-          await Products.findOneAndUpdate(
-            { _id: req.params.id },
-            {
-              $pull: {
-                images: req.params.image,
-              },
-            }
-          );
-          res.json({ msg: "Image removed successfuly!" });
-        });
+        await removeImage(req.query.imagePath);
+        await Products.findOneAndUpdate(
+          { _id: req.params.id },
+          {
+            $pull: {
+              images: req.query.imagePath,
+            },
+          }
+        );
+        res.json({ msg: "Image removed successfuly!" });
       } else {
         return res.status(400).json({
           msg: "Product must have at least one image, Please add more images to remove this one!",
@@ -190,7 +188,7 @@ const validatProductOwner = async (userId, productId) => {
 };
 
 const removeImage = async (imagesPath) => {
-  await fs.unlink("uploads/" + imagesPath, function (err) {
+  await fs.unlink(imagesPath, function (err) {
     return true;
   });
 };

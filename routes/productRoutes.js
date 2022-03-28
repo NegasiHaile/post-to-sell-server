@@ -24,7 +24,7 @@ router.delete(
   productCntrlr.deleteProduct
 );
 router.put(
-  "/delete/image/:id/:image",
+  "/delete/image/:id",
   Auth(["user"]),
   productCntrlr.deleteProductImage
 );
