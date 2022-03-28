@@ -4,9 +4,7 @@ const bannerSchema = new mongoose.Schema(
   {
     banner: {
       type: String,
-      required: "Banner image is required!",
-      unique: true,
-      trim: true,
+      required: true,
     },
     title: {
       type: String,
