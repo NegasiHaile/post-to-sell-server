@@ -12,14 +12,14 @@ const advertCntrlr = {
         title,
         description,
         type,
-        banner: req.file.filename,
+        advertBanner: "uploads/adverts/" + req.file.filename,
         link,
         duration,
       });
       await newAdvert.save();
       res.json({ msg: "Advert added successfuly!" });
     } catch (error) {
-      await removeAdvetBanner(req.file.filename);
+      await removeAdvetBanner("uploads/adverts/" + req.file.filename);
       res.status(500).json({ msg: error.message });
     }
   },
@@ -55,17 +55,17 @@ const advertCntrlr = {
           return res.status(400).json({ msg: "Perimission denied!" });
 
         const advert = await Adverts.findById({ _id: req.params.id });
-        await removeAdvetBanner(advert.banner);
+        await removeAdvetBanner(advert.advertBanner);
         await Adverts.findOneAndUpdate(
           { _id: req.params.id },
-          { banner: req.file.filename }
+          { advertBanner: "uploads/adverts/" + req.file.filename }
         );
         res.json({ msg: "Banner updated successfuly!" });
       } else {
         return res.status(400).json({ msg: "Banner required!" });
       }
     } catch (error) {
-      await removeAdvetBanner(req.file.filename);
+      await removeAdvetBanner("uploads/adverts/" + req.file.filename);
       res.status(500).json({ msg: error.message });
     }
   },
@@ -77,7 +77,7 @@ const advertCntrlr = {
         return res.status(400).json({ msg: "Perimission denied!" });
 
       const advert = await Adverts.findById({ _id: req.params.id });
-      await removeAdvetBanner(advert.banner);
+      await removeAdvetBanner(advert.advertBanner);
       await Adverts.findOneAndDelete({ _id: req.params.id });
       res.json({ msg: "Advert deleted successfuly!" });
     } catch (error) {
@@ -97,8 +97,8 @@ const validatAdvertOwner = async (userId, advertId) => {
     return false;
   }
 };
-const removeAdvetBanner = async (imagesPath) => {
-  await fs.unlink("uploads/" + imagesPath, function (error) {
+const removeAdvetBanner = async (advertBannerPath) => {
+  await fs.unlink(advertBannerPath, function (error) {
     return true;
   });
 };

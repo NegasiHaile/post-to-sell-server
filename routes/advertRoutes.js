@@ -6,7 +6,7 @@ const Auth = require("../middleware/Auth");
 router.post(
   "/add",
   Auth(["user"]),
-  upload.single("banner"),
+  upload.single("advertBanner"),
   advertCntrlr.addAdvert
 );
 router.get("/list", advertCntrlr.getAllAdvert);
@@ -14,7 +14,7 @@ router.put("/edit/:id", Auth(["user"]), advertCntrlr.editAdvert);
 router.put(
   "/edit/banner/:id",
   Auth(["user"]),
-  upload.single("banner"),
+  upload.single("advertBanner"),
   advertCntrlr.editAdvertBanner
 );
 router.delete("/delete/:id", Auth(["user"]), advertCntrlr.deleteAdvert);

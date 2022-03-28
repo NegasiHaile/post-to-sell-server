@@ -19,7 +19,7 @@ const addSchema = new mongoose.Schema(
       type: String, // Regular, Featured
       required: true,
     },
-    banner: {
+    advertBanner: {
       type: String,
       required: true,
     },
