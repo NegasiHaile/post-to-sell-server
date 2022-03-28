@@ -51,7 +51,7 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
     contacts: {
-      type: Array,
+      type: Object,
       required: true,
     },
     reactions: {
