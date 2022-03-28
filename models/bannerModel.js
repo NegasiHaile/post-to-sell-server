@@ -8,6 +8,7 @@ const bannerSchema = new mongoose.Schema(
     },
     title: {
       type: String,
+      trim: true,
     },
     sequence: {
       type: Number,
