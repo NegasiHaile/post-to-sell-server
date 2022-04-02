@@ -10,6 +10,12 @@ router.post(
   productCntrlr.addProduct
 );
 router.get("/list/all", productCntrlr.getAllProducts);
+router.get("/list/all/featured", productCntrlr.getAllFeaturedProducts);
+router.get(
+  "/list/all/user/:id",
+  Auth(["admin", "user"]),
+  productCntrlr.getAllUserProducts
+);
 router.get("/detail/:id", productCntrlr.getProductDetail);
 router.put("/edit/:id", Auth(["user"]), productCntrlr.editProduct);
 router.put(

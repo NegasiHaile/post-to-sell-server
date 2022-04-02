@@ -62,6 +62,24 @@ const productCntrlr = {
       res.status(500).json({ msg: error.message });
     }
   },
+  getAllFeaturedProducts: async (req, res) => {
+    try {
+      res.json(
+        await Products.find({
+          postType: { $regex: new RegExp("featured", "i") },
+        })
+      );
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  },
+  getAllUserProducts: async (req, res) => {
+    try {
+      res.json(await Products.find({ userId: req.params.id }));
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  },
   getProductDetail: async (req, res) => {
     try {
       res.json(await Products.findById(req.params.id));
