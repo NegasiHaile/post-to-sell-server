@@ -30,7 +30,7 @@ app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/products", require("./routes/productRoutes"));
 app.use("/api/categories", require("./routes/categoryRoutes"));
 app.use("/api/adverts", require("./routes/advertRoutes"));
-app.use("/api/banner", require("./routes/bannerRouters"));
+app.use("/api/banners", require("./routes/bannerRouters"));
 
 // define the server port
 const PORT = process.env.PORT || 5000;
