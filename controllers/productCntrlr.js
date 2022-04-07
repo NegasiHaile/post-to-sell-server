@@ -94,7 +94,7 @@ const productCntrlr = {
       if (!validUser)
         return res.status(400).json({ msg: "Perimission denied!" });
 
-      await Products.findOneAndUpdate(
+      const updatedData = await Products.findOneAndUpdate(
         { _id: req.params.id },
         ({
           productName,
@@ -107,9 +107,10 @@ const productCntrlr = {
           postType,
           tag,
           contacts,
-        } = req.body)
+        } = req.body),
+        { new: true }
       );
-      res.json({ msg: "Product edited successfully!" });
+      res.json({ data: updatedData, msg: "Product edited successfully!" });
     } catch (error) {
       res.status(500).json({ msg: error.message });
     }
@@ -124,15 +125,16 @@ const productCntrlr = {
       const product = await Products.findById(req.params.id);
 
       if (product.images.length < 5) {
-        await Products.findOneAndUpdate(
+        const newData = await Products.findOneAndUpdate(
           { _id: req.params.id },
           {
             $push: {
               images: "uploads/products/" + req.file.filename,
             },
-          }
+          },
+          { new: true }
         );
-        res.json({ msg: "Image uploaded successfully" });
+        res.json({ data: newData, msg: "Image uploaded successfully" });
       } else {
         await removeImage("uploads/products/" + req.file.filename);
         return res.status(400).json({
@@ -172,15 +174,16 @@ const productCntrlr = {
         return res.status(400).json({ msg: "Image not found!" });
       if (product.images.length > 1) {
         await removeImage(req.query.imagePath);
-        await Products.findOneAndUpdate(
+        const newData = await Products.findOneAndUpdate(
           { _id: req.params.id },
           {
             $pull: {
               images: req.query.imagePath,
             },
-          }
+          },
+          { new: true }
         );
-        res.json({ msg: "Image removed successfuly!" });
+        res.json({ data: newData, msg: "Image removed successfuly!" });
       } else {
         return res.status(400).json({
           msg: "Product must have at least one image, Please add more images to remove this one!",
