@@ -24,6 +24,12 @@ router.put(
   upload.single("image"),
   productCntrlr.editProductImage
 );
+router.put(
+  "/add/image/:id",
+  Auth(["user"]),
+  upload.single("image"),
+  productCntrlr.addProductImage
+);
 router.delete(
   "/delete/:id",
   Auth(["admin", "user"]),
