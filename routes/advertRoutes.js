@@ -10,6 +10,11 @@ router.post(
   advertCntrlr.addAdvert
 );
 router.get("/list", advertCntrlr.getAllAdvert);
+router.get(
+  "/list/user/:id",
+  Auth(["admin", "user"]),
+  advertCntrlr.getAllUserAdvert
+);
 router.put("/edit/:id", Auth(["user"]), advertCntrlr.editAdvert);
 router.put(
   "/edit/banner/:id",

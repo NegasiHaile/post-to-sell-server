@@ -30,6 +30,14 @@ const advertCntrlr = {
       res.status(500).json({ msg: error.message });
     }
   },
+  getAllUserAdvert: async (req, res) => {
+    // Fetch all user adverts
+    try {
+      res.json(await Adverts.find({ userId: req.params.id }));
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  },
   editAdvert: async (req, res) => {
     try {
       const validUser = await validatAdvertOwner(req.user.id, req.params.id);
@@ -86,9 +94,11 @@ const advertCntrlr = {
   },
 };
 const validatAdvertOwner = async (userId, advertId) => {
-  const product = await Adverts.findById(advertId);
-  if (product) {
-    if (product.userId === userId) {
+  // Check which user is trying to take this action And,
+  // Allow only the owner of the advert for this action
+  const advert = await Adverts.findById(advertId);
+  if (advert) {
+    if (advert.userId === userId) {
       return true;
     } else {
       return false;
