@@ -41,10 +41,10 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     accountStatus: {
-      type: String, // Values: unverified, verified, blocked
+      type: String, // Values: unverified, ON, blocked
       required: true,
       trim: true,
-      default: "unverified",
+      default: "ON", // When email verified
     },
   },
   {
