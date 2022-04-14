@@ -15,6 +15,8 @@ const productCntrlr = {
           price,
           currentPrice,
           discription,
+          sizes,
+          colors,
           postType,
           tag,
           contacts,
@@ -22,7 +24,7 @@ const productCntrlr = {
 
         let imagesPath = [];
         files.forEach((file) => {
-          imagesPath.push(file.filename);
+          imagesPath.push("uploads/products/" + file.filename);
         });
 
         const newProduct = new Products({
@@ -34,6 +36,8 @@ const productCntrlr = {
           price,
           currentPrice,
           discription,
+          sizes,
+          colors,
           postType,
           tag,
           images: imagesPath,
@@ -50,7 +54,7 @@ const productCntrlr = {
       }
     } catch (error) {
       req.files.forEach((file) => {
-        removeImage(file.filename);
+        removeImage("uploads/products/" + file.filename);
       });
       res.status(500).json({ msg: error.message });
     }
@@ -58,6 +62,24 @@ const productCntrlr = {
   getAllProducts: async (req, res) => {
     try {
       res.json(await Products.find());
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  },
+  getAllFeaturedProducts: async (req, res) => {
+    try {
+      res.json(
+        await Products.find({
+          postType: { $regex: new RegExp("featured", "i") },
+        })
+      );
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  },
+  getAllUserProducts: async (req, res) => {
+    try {
+      res.json(await Products.find({ userId: req.params.id }));
     } catch (error) {
       res.status(500).json({ msg: error.message });
     }
@@ -76,7 +98,7 @@ const productCntrlr = {
       if (!validUser)
         return res.status(400).json({ msg: "Perimission denied!" });
 
-      await Products.findOneAndUpdate(
+      const updatedData = await Products.findOneAndUpdate(
         { _id: req.params.id },
         ({
           productName,
@@ -86,12 +108,15 @@ const productCntrlr = {
           price,
           currentPrice,
           discription,
+          sizes,
+          colors,
           postType,
           tag,
           contacts,
-        } = req.body)
+        } = req.body),
+        { new: true }
       );
-      res.json({ msg: "Product edited successfully!" });
+      res.json({ data: updatedData, msg: "Product edited successfully!" });
     } catch (error) {
       res.status(500).json({ msg: error.message });
     }
@@ -103,20 +128,37 @@ const productCntrlr = {
       if (!validUser)
         return res.status(400).json({ msg: "Perimission denied!" });
 
-      const product = await Products.findById(req.params.id);
+      // req.body.url is the url of old image
+      removeImage(req.body.url);
+      // req.params.id is Id of the product
+      removeImageURL(req.params.id, req.body.url);
+      const newData = await addImageURL(
+        req.params.id,
+        "uploads/products/" + req.file.filename,
+        req.body.position
+      );
+      res.json({ data: newData, msg: "Image updated successfully" });
+    } catch (error) {
+      res.status(400).send(error.message);
+    }
+  },
+  addProductImage: async (req, res) => {
+    try {
+      const validUser = await validatProductOwner(req.user.id, req.params.id);
 
+      if (!validUser)
+        return res.status(400).json({ msg: "Perimission denied!" });
+
+      const product = await Products.findById(req.params.id);
       if (product.images.length < 5) {
-        await Products.findOneAndUpdate(
-          { _id: req.params.id },
-          {
-            $push: {
-              images: req.file.filename,
-            },
-          }
+        const newData = await addImageURL(
+          req.params.id,
+          "uploads/products/" + req.file.filename,
+          5
         );
-        res.json({ msg: "Image uploaded successfully" });
+        res.json({ data: newData, msg: "Image uploaded successfully" });
       } else {
-        await removeImage(req.file.filename);
+        await removeImage("uploads/products/" + req.file.filename);
         return res.status(400).json({
           msg: "Only 5 images are allowed to upload, Please remove some images first!",
         });
@@ -133,7 +175,7 @@ const productCntrlr = {
         return res.status(400).json({ msg: "Perimission denied!" });
 
       const product = await Products.findById(req.params.id);
-      console.log(product);
+
       for (let i = 0; i < product.images.length; i++) {
         await removeImage(product.images[i]);
       }
@@ -150,21 +192,15 @@ const productCntrlr = {
       if (!validUser)
         return res.status(400).json({ msg: "Perimission denied!" });
       const product = await Products.findById(req.params.id);
-      if (!product.images.includes(req.params.image))
+      if (!product.images.includes(req.query.imagePath))
         return res.status(400).json({ msg: "Image not found!" });
-
       if (product.images.length > 1) {
-        fs.unlink("uploads/" + req.params.image, async (err) => {
-          await Products.findOneAndUpdate(
-            { _id: req.params.id },
-            {
-              $pull: {
-                images: req.params.image,
-              },
-            }
-          );
-          res.json({ msg: "Image removed successfuly!" });
-        });
+        await removeImage(req.query.imagePath);
+        const newData = await removeImageURL(
+          req.params.id,
+          req.query.imagePath
+        );
+        res.json({ data: newData, msg: "Image removed successfuly!" });
       } else {
         return res.status(400).json({
           msg: "Product must have at least one image, Please add more images to remove this one!",
@@ -177,6 +213,7 @@ const productCntrlr = {
 };
 
 const validatProductOwner = async (userId, productId) => {
+  // This function check the owner of the product then returns true
   const product = await Products.findById(productId);
   if (product) {
     if (product.userId === userId) {
@@ -188,9 +225,37 @@ const validatProductOwner = async (userId, productId) => {
     return false;
   }
 };
+addImageURL = async (prdct_id, imageUrl, position) => {
+  // This function add the new image URL to the images array of spesfic product
+  const newData = await Products.findOneAndUpdate(
+    { _id: prdct_id },
+    {
+      $push: {
+        images: { $each: [imageUrl], $position: position },
+      },
+    },
+    { new: true }
+  );
+  return newData;
+};
+removeImageURL = async (prdct_id, URL) => {
+  // This function removes the image URL form the images array
+  const newData = await Products.findOneAndUpdate(
+    { _id: prdct_id },
+    {
+      $pull: {
+        images: URL,
+      },
+    },
+    { new: true }
+  );
+
+  return newData;
+};
 
 const removeImage = async (imagesPath) => {
-  await fs.unlink("uploads/" + imagesPath, function (err) {
+  // This function removes the image from the folder where it is stored
+  await fs.unlink(imagesPath, function (err) {
     return true;
   });
 };

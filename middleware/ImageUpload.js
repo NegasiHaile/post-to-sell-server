@@ -3,10 +3,11 @@ const multer = require("multer");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    if (file?.fieldname === "banner") {
+    if (file.fieldname === "images" || file.fieldname === "image") {
+      cb(null, "uploads/products");
+    } else if (file.fieldname === "banner") {
       cb(null, "uploads/banners");
-    }
-    if (file?.fieldname === "advertBanner") {
+    } else if (file.fieldname === "advertBanner") {
       cb(null, "uploads/adverts");
     } else {
       cb(null, "uploads");
