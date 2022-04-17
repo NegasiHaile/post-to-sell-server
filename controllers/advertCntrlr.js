@@ -25,7 +25,7 @@ const advertCntrlr = {
   },
   getAllAdvert: async (req, res) => {
     try {
-      res.json(await Adverts.find());
+      res.json(await Adverts.find().sort({ createdAt: -1 }));
     } catch (error) {
       res.status(500).json({ msg: error.message });
     }
@@ -33,13 +33,16 @@ const advertCntrlr = {
   getAllUserAdvert: async (req, res) => {
     // Fetch all user adverts
     try {
-      res.json(await Adverts.find({ userId: req.params.id }));
+      res.json(
+        await Adverts.find({ userId: req.params.id }).sort({ createdAt: -1 })
+      );
     } catch (error) {
       res.status(500).json({ msg: error.message });
     }
   },
   editAdvert: async (req, res) => {
     try {
+      console.log(req.body);
       const validUser = await validatAdvertOwner(req.user.id, req.params.id);
 
       if (!validUser)
