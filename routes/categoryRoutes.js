@@ -1,8 +1,14 @@
 const router = require("express").Router();
 const categoryCntrlr = require("../controllers/categoryCntrlr");
+const { upload } = require("../middleware/ImageUpload");
 const Auth = require("../middleware/Auth");
 
-router.post("/add", Auth(["admin"]), categoryCntrlr.addCategory);
+router.post(
+  "/add",
+  Auth(["admin"]),
+  upload.single("categoryImage"),
+  categoryCntrlr.addCategory
+);
 
 router.get("/list", categoryCntrlr.getCategories);
 
