@@ -13,6 +13,11 @@ router.post(
 router.get("/list", categoryCntrlr.getCategories);
 
 router.put("/edit/:id", Auth(["admin"]), categoryCntrlr.editCategory);
-
+router.put(
+  "/edit/image/:id",
+  Auth(["admin"]),
+  upload.single("categoryImage"),
+  categoryCntrlr.editCategoryImage
+);
 router.delete("/delete/:id", Auth(["admin"]), categoryCntrlr.deleteCategory);
 module.exports = router;
