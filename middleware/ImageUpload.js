@@ -9,6 +9,8 @@ const storage = multer.diskStorage({
       cb(null, "uploads/banners");
     } else if (file.fieldname === "advertBanner") {
       cb(null, "uploads/adverts");
+    } else if (file.fieldname === "categoryImage") {
+      cb(null, "uploads/products/categories");
     } else {
       cb(null, "uploads");
     }
