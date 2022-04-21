@@ -31,22 +31,20 @@ const userCntrlr = {
 
       // Save the user to database
       await newUser.save();
-
+      console.log(newUser);
       // Then create a token for authentication then a user can signin authomaticaly
-      const accessToken = createAccessToken({ id: newUser.id });
-      const refreshToken = createRefreshToken({ id: newUser.id });
+      const accesstoken = createAccessToken({ id: newUser.id });
+      const refreshtoken = createRefreshToken({ id: newUser.id });
 
-      res.cookie("refreshtoken", refreshToken, {
+      res.cookie("refreshtoken", refreshtoken, {
         httpOnly: true,
         path: "/edp/users/refresh_token",
       });
-
+      newUser.password = null;
       res.json({
-        accessToken,
-        refreshToken,
-        role: "user",
-        id: newUser.id,
-        accountStatus: "unverified",
+        accesstoken,
+        refreshtoken,
+        profile: newUser,
       });
     } catch (error) {
       return res.status(500).json({ msg: error.message });
