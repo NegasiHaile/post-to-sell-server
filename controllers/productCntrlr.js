@@ -132,11 +132,12 @@ const productCntrlr = {
       removeImage(req.body.url);
       // req.params.id is Id of the product
       removeImageURL(req.params.id, req.body.url);
-      const newData = await addImageURL(
+      await addImageURL(
         req.params.id,
         "uploads/products/" + req.file.filename,
         req.body.position
       );
+      const newData = await Products.findById(req.params.id);
       res.json({ data: newData, msg: "Image updated successfully" });
     } catch (error) {
       res.status(400).send(error.message);
