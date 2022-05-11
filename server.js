@@ -33,7 +33,7 @@ app.use("/api/adverts", require("./routes/advertRoutes"));
 app.use("/api/banners", require("./routes/bannerRouters"));
 
 // define the server port
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5055;
 app.listen(PORT, () => {
   console.log("Server is runnig on port ", PORT);
 });
