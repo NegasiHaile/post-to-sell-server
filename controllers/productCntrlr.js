@@ -211,6 +211,21 @@ const productCntrlr = {
       res.status(500).json({ msg: error.message });
     }
   },
+  // Approve product:- Means the product content is formal, And it can be seen in the public products list
+  approveProduct: async (req, res) => {
+    try {
+      const updatedData = await Products.findOneAndUpdate(
+        { _id: req.params.id },
+        {
+          status: "active",
+        },
+        { new: true }
+      );
+      res.json({ data: updatedData, msg: "Product approved successfully!" });
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  },
 };
 
 const validatProductOwner = async (userId, productId) => {
