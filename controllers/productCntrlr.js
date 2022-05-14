@@ -1,5 +1,4 @@
 const Products = require("../models/productModel");
-
 const fs = require("fs");
 
 const productCntrlr = {
@@ -59,6 +58,7 @@ const productCntrlr = {
       res.status(500).json({ msg: error.message });
     }
   },
+
   getAllProducts: async (req, res) => {
     try {
       res.json(await Products.find());
@@ -66,6 +66,7 @@ const productCntrlr = {
       res.status(500).json({ msg: error.message });
     }
   },
+
   getAllFeaturedProducts: async (req, res) => {
     try {
       res.json(
@@ -77,6 +78,7 @@ const productCntrlr = {
       res.status(500).json({ msg: error.message });
     }
   },
+
   getAllUserProducts: async (req, res) => {
     try {
       res.json(await Products.find({ userId: req.params.id }));
@@ -84,6 +86,7 @@ const productCntrlr = {
       res.status(500).json({ msg: error.message });
     }
   },
+
   getProductDetail: async (req, res) => {
     try {
       res.json(await Products.findById(req.params.id));
@@ -91,6 +94,7 @@ const productCntrlr = {
       res.status(500).json({ msg: error.message });
     }
   },
+
   editProduct: async (req, res) => {
     try {
       const validUser = await validatProductOwner(req.user.id, req.params.id);
@@ -121,6 +125,7 @@ const productCntrlr = {
       res.status(500).json({ msg: error.message });
     }
   },
+
   editProductImage: async (req, res) => {
     try {
       const validUser = await validatProductOwner(req.user.id, req.params.id);
@@ -143,6 +148,7 @@ const productCntrlr = {
       res.status(400).send(error.message);
     }
   },
+
   addProductImage: async (req, res) => {
     try {
       const validUser = await validatProductOwner(req.user.id, req.params.id);
@@ -168,24 +174,32 @@ const productCntrlr = {
       res.status(400).send(error.message);
     }
   },
-  deleteProduct: async (req, res) => {
-    try {
-      const validUser = await validatProductOwner(req.user.id, req.params.id);
 
-      if (!validUser)
-        return res.status(400).json({ msg: "Perimission denied!" });
+  deleteProduct: (permissions) => {
+    return async (req, res) => {
+      try {
+        const validUser = await validatProductOwner(
+          req.user.id,
+          req.params.id,
+          permissions
+        );
 
-      const product = await Products.findById(req.params.id);
+        if (!validUser)
+          return res.status(400).json({ msg: "Perimission denied!" });
 
-      for (let i = 0; i < product.images.length; i++) {
-        await removeImage(product.images[i]);
+        const product = await Products.findById(req.params.id);
+
+        for (let i = 0; i < product.images.length; i++) {
+          await removeImage(product.images[i]);
+        }
+        await Products.findOneAndDelete({ _id: req.params.id });
+        res.json({ msg: "Product deleted successfuly!" });
+      } catch (error) {
+        res.status(500).json({ msg: error.message });
       }
-      await Products.findOneAndDelete({ _id: req.params.id });
-      res.json({ msg: "Product deleted successfuly!" });
-    } catch (error) {
-      res.status(500).json({ msg: error.message });
-    }
+    };
   },
+
   deleteProductImage: async (req, res) => {
     try {
       const validUser = await validatProductOwner(req.user.id, req.params.id);
@@ -211,6 +225,7 @@ const productCntrlr = {
       res.status(500).json({ msg: error.message });
     }
   },
+
   // Approve product:- Means the product content is formal, And it can be seen in the public products list
   approveProduct: async (req, res) => {
     try {
@@ -244,11 +259,11 @@ const productCntrlr = {
   },
 };
 
-const validatProductOwner = async (userId, productId) => {
-  // This function check the owner of the product then returns true
+// This function checks who is allowed to delte the product (the owner and the admin)
+const validatProductOwner = async (userId, productId, permissions) => {
   const product = await Products.findById(productId);
   if (product) {
-    if (product.userId === userId) {
+    if (product.userId === userId || permissions?.includes("admin")) {
       return true;
     } else {
       return false;
@@ -257,6 +272,7 @@ const validatProductOwner = async (userId, productId) => {
     return false;
   }
 };
+
 addImageURL = async (prdct_id, imageUrl, position) => {
   // This function add the new image URL to the images array of spesfic product
   const newData = await Products.findOneAndUpdate(
@@ -270,6 +286,7 @@ addImageURL = async (prdct_id, imageUrl, position) => {
   );
   return newData;
 };
+
 removeImageURL = async (prdct_id, URL) => {
   // This function removes the image URL form the images array
   const newData = await Products.findOneAndUpdate(

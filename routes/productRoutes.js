@@ -33,7 +33,7 @@ router.put(
 router.delete(
   "/delete/:id",
   Auth(["admin", "user"]),
-  productCntrlr.deleteProduct
+  productCntrlr.deleteProduct(["admin", "user"])
 );
 router.put(
   "/delete/image/:id",
