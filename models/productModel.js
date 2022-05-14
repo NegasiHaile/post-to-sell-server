@@ -73,6 +73,11 @@ const productSchema = new mongoose.Schema(
       required: true,
       default: "1",
     },
+    status: {
+      type: String,
+      required: true,
+      default: "new", // values: New, active or archived
+    },
   },
   {
     timestamps: true,
