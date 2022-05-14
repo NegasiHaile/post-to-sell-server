@@ -41,4 +41,7 @@ router.put(
   productCntrlr.deleteProductImage
 );
 
+// Approve product
+router.put("/approve/:id", Auth(["admin"]), productCntrlr.approveProduct);
+
 module.exports = router;
