@@ -226,6 +226,22 @@ const productCntrlr = {
       res.status(500).json({ msg: error.message });
     }
   },
+
+  // Archive product:- Means the product will not be display in the public page any more, But exitst in the database
+  archiveProduct: async (req, res) => {
+    try {
+      const updatedData = await Products.findOneAndUpdate(
+        { _id: req.params.id },
+        {
+          status: "archived",
+        },
+        { new: true }
+      );
+      res.json({ data: updatedData, msg: "Product archived successfully!" });
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  },
 };
 
 const validatProductOwner = async (userId, productId) => {

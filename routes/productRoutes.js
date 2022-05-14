@@ -44,4 +44,7 @@ router.put(
 // Approve product
 router.put("/approve/:id", Auth(["admin"]), productCntrlr.approveProduct);
 
+// Achive product
+router.put("/archive/:id", Auth(["admin"]), productCntrlr.archiveProduct);
+
 module.exports = router;
