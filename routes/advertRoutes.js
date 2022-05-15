@@ -29,7 +29,11 @@ router.put(
   advertCntrlr.editAdvertBanner
 );
 
-router.delete("/delete/:id", Auth(["user"]), advertCntrlr.deleteAdvert);
+router.delete(
+  "/delete/:id",
+  Auth(["admin", "user"]),
+  advertCntrlr.deleteAdvert(["admin", "user"])
+);
 
 // Approve Advert
 router.put("/approve/:id", Auth(["admin"]), advertCntrlr.approveAdvert);
