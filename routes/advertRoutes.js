@@ -34,4 +34,7 @@ router.delete("/delete/:id", Auth(["user"]), advertCntrlr.deleteAdvert);
 // Approve Advert
 router.put("/approve/:id", Auth(["admin"]), advertCntrlr.approveAdvert);
 
+// Achive Advert
+router.put("/archive/:id", Auth(["admin"]), advertCntrlr.archiveAdvert);
+
 module.exports = router;

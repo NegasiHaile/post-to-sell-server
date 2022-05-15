@@ -111,6 +111,22 @@ const advertCntrlr = {
       res.status(500).json({ msg: error.message });
     }
   },
+
+  // Archive advert:- Means the Advert will not be display in the public page any more, But exitst in the database
+  archiveAdvert: async (req, res) => {
+    try {
+      const updatedData = await Adverts.findOneAndUpdate(
+        { _id: req.params.id },
+        {
+          status: "archived",
+        },
+        { new: true }
+      );
+      res.json({ data: updatedData, msg: "Advert archived successfully!" });
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  },
 };
 const validatAdvertOwner = async (userId, advertId) => {
   // Check which user is trying to take this action And,
