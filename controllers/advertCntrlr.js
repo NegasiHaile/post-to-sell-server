@@ -95,6 +95,22 @@ const advertCntrlr = {
       res.status(500).json({ msg: error.message });
     }
   },
+
+  // Approve Advert:- Means the Advert content is formal, And it can be seen in the public adverts list
+  approveAdvert: async (req, res) => {
+    try {
+      const updatedData = await Adverts.findOneAndUpdate(
+        { _id: req.params.id },
+        {
+          status: "active",
+        },
+        { new: true }
+      );
+      res.json({ data: updatedData, msg: "Advert approved successfully!" });
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  },
 };
 const validatAdvertOwner = async (userId, advertId) => {
   // Check which user is trying to take this action And,
