@@ -38,7 +38,7 @@ const addSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
-      default: "new", // values: New, active or archived
+      default: "active", // values: New, active or archived
     },
   },
   { timestamps: true }
