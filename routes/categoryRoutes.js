@@ -6,7 +6,7 @@ const Auth = require("../middleware/Auth");
 router.post(
   "/add",
   Auth(["admin"]),
-  upload.single("categoryImage"),
+  // upload.single("categoryImage"),
   categoryCntrlr.addCategory
 );
 
