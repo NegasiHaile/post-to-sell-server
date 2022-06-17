@@ -16,6 +16,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    gender: {
+      type: String,
+    },
+    phone: {
+      type: String,
+      unique: true,
+    },
     email: {
       type: String,
       lowercase: true,
@@ -27,6 +34,7 @@ const userSchema = new mongoose.Schema(
         "Please fill a valid email address!",
       ],
     },
+    address: { type: String },
     role: {
       type: String,
       required: true,
@@ -37,7 +45,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
     contacts: {
-      type: Array,
+      type: Object,
       required: true,
     },
     accountStatus: {
