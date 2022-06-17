@@ -6,16 +6,6 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    productName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    brand: {
-      type: String,
-      required: true,
-      trim: true,
-    },
     category: {
       type: String,
       required: true,
@@ -25,13 +15,23 @@ const productSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    brand: {
+      type: String,
+      trim: true,
+    },
+    model: {
+      type: String,
+    },
+    productName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     price: {
       type: Number,
-      required: true,
     },
     currentPrice: {
       type: Number,
-      required: true,
     },
     discription: {
       type: String,
