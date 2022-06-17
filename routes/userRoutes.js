@@ -29,6 +29,9 @@ router.post("/signin", userCntrlr.signIn);
 // Get profile
 router.get("/profile", Auth(["admin", "user"]), userCntrlr.getProfile);
 
+// Change password
+router.put("/change_my_password", Auth(["user"]), userCntrlr.changeMypassword);
+
 // Blocloking and Activeting uses account
 router.put(
   "/activate_account/:id",
