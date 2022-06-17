@@ -109,11 +109,15 @@ const userCntrlr = {
   // Edit user detail
   editUser: async (req, res) => {
     try {
-      await Users.findOneAndUpdate(
+      const updatedData = await Users.findOneAndUpdate(
         { _id: req.params.id },
-        ({ fName, lName, email, phone, contacts } = req.body)
+        ({ fName, lName, email, phone, contacts } = req.body),
+        { new: true }
       );
-      res.json({ msg: "User datail edited successfuly!" });
+      res.json({
+        updated: updatedData,
+        msg: "User datail edited successfuly!",
+      });
     } catch (error) {
       res.status(500).json({ meg: error.msg });
     }
@@ -192,6 +196,32 @@ const userCntrlr = {
       return res.status(500).json({ msg: err.message });
     }
   },
+  // Change user password
+  changeMypassword: async (req, res) => {
+    try {
+      // password encryption
+      const hashedNewPassword = await bcrypt.hash(req.body.newPassword, 10);
+
+      // Get the existing used data
+      const existingData = await Users.findById(req.user.id);
+      // compare the old password in database and that coming from user
+      const passwordMatch = await bcrypt.compare(
+        req.body.oldPassword,
+        existingData.password
+      );
+      if (!passwordMatch)
+        return res.status(400).json({ msg: "Incorrect old password!" });
+
+      await Users.findOneAndUpdate(
+        { _id: req.user.id },
+        { password: hashedNewPassword }
+      );
+      res.json({ msg: "Password changed successfully!" });
+    } catch (error) {
+      return res.status(500).json({ msg: err.message });
+    }
+  },
+
   // Blocking user account
   blockUserAccount: async (req, res) => {
     try {
