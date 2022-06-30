@@ -40,7 +40,11 @@ router.put(
   Auth(["user"]),
   productCntrlr.deleteProductImage
 );
-
+router.put(
+  "/payment/update_status/:id",
+  Auth(["user"]),
+  productCntrlr.updateProductPaymentStatus
+);
 // Approve product
 router.put("/approve/:id", Auth(["admin"]), productCntrlr.approveProduct);
 

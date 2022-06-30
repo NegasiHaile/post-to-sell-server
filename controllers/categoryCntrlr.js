@@ -5,7 +5,7 @@ const categoryCntrlr = {
   // Add new  products category
   addCategory: async (req, res) => {
     try {
-      const { category, subCategory, description } = req.body;
+      const { category, subCategory, description, postFee } = req.body;
       const existingCategory = await Categories.findOne({ category: category });
       if (existingCategory) {
         return res.status(400).json({ msg: "Category exist!" });
@@ -14,6 +14,7 @@ const categoryCntrlr = {
           category,
           subCategory,
           description,
+          postFee,
           categoryImage: "uploads/products/categories/",
         });
         await newCategory.save();

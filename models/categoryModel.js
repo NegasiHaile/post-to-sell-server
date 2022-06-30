@@ -11,6 +11,10 @@ const categorySchema = new mongoose.Schema(
     subCategory: {
       type: Array,
     },
+    postFee: {
+      type: Number,
+      required: true,
+    },
     description: {
       type: String,
       trim: true,

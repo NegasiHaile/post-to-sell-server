@@ -45,7 +45,7 @@ const productCntrlr = {
 
         await newProduct.save();
 
-        res.json({ msg: "Product added successfuly!" });
+        res.json({ msg: "Product added successfuly!", product: newProduct });
       } else {
         res.status(400).json({
           msg: "Images must not less than 1 and not more than 5 items!",
@@ -71,7 +71,11 @@ const productCntrlr = {
     try {
       res.json(
         await Products.find({
-          postType: { $regex: new RegExp("featured", "i") },
+          $and: [
+            { postType: { $regex: new RegExp("featured", "i") } },
+            { status: { $regex: new RegExp("active", "i") } },
+            { postPayment: 1 },
+          ],
         })
       );
     } catch (error) {
@@ -226,6 +230,27 @@ const productCntrlr = {
     }
   },
 
+  // Update product paymet status
+  updateProductPaymentStatus: async (req, res) => {
+    try {
+      var expireDate = new Date();
+      if (req.body.payFor) {
+        expireDate.setMonth(expireDate.getMonth() + req.body.payFor);
+        const updatedData = await Products.findOneAndUpdate(
+          { _id: req.params.id },
+          {
+            postPayment: 1,
+            status: "active",
+            postExpireDate: expireDate,
+          },
+          { new: true }
+        );
+        res.json({ data: updatedData, msg: "Payment done!" });
+      }
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  },
   // Approve product:- Means the product content is formal, And it can be seen in the public products list
   approveProduct: async (req, res) => {
     try {
