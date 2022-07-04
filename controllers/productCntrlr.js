@@ -69,12 +69,14 @@ const productCntrlr = {
 
   getAllFeaturedProducts: async (req, res) => {
     try {
+      const date = new Date();
       res.json(
         await Products.find({
           $and: [
             { postType: { $regex: new RegExp("featured", "i") } },
             { status: { $regex: new RegExp("active", "i") } },
             { postPayment: 1 },
+            { postExpireDate: { $lt: data } },
           ],
         })
       );
