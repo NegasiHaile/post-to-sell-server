@@ -76,7 +76,7 @@ const productCntrlr = {
             { postType: { $regex: new RegExp("featured", "i") } },
             { status: { $regex: new RegExp("active", "i") } },
             { postPayment: 1 },
-            { postExpireDate: { $lt: data } },
+            { postExpireDate: { $gte: date } },
           ],
         })
       );
