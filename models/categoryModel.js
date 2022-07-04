@@ -15,6 +15,10 @@ const categorySchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    featuredPostFee: {
+      type: Number,
+      required: true,
+    },
     description: {
       type: String,
       trim: true,
