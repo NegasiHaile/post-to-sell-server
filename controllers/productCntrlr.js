@@ -67,6 +67,23 @@ const productCntrlr = {
     }
   },
 
+  getOnlyActiveProducts: async (req, res) => {
+    try {
+      const date = new Date();
+      res.json(
+        await Products.find({
+          $and: [
+            { status: { $regex: new RegExp("active", "i") } },
+            { postPayment: 1 },
+            { postExpireDate: { $gte: date } },
+          ],
+        })
+      );
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  },
+
   getAllFeaturedProducts: async (req, res) => {
     try {
       const date = new Date();
