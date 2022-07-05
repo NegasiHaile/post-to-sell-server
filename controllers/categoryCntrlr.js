@@ -5,7 +5,8 @@ const categoryCntrlr = {
   // Add new  products category
   addCategory: async (req, res) => {
     try {
-      const { category, subCategory, description, postFee } = req.body;
+      const { category, subCategory, description, postFee, featuredPostFee } =
+        req.body;
       const existingCategory = await Categories.findOne({ category: category });
       if (existingCategory) {
         return res.status(400).json({ msg: "Category exist!" });
@@ -15,6 +16,7 @@ const categoryCntrlr = {
           subCategory,
           description,
           postFee,
+          featuredPostFee,
           categoryImage: "uploads/products/categories/",
         });
         await newCategory.save();
@@ -38,7 +40,8 @@ const categoryCntrlr = {
         return res.status(400).json({ msg: "Category not found!" });
       await Categories.findOneAndUpdate(
         { _id: req.params.id },
-        ({ category, subCategory, description } = req.body)
+        ({ category, subCategory, postFee, featuredPostFee, description } =
+          req.body)
       );
 
       res.json({ msg: "Category edited successfuly!" });
