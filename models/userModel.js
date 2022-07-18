@@ -54,6 +54,17 @@ const userSchema = new mongoose.Schema(
       trim: true,
       default: "ON", // When email verified
     },
+    notifications: {
+      id: { type: String },
+      title: { type: String },
+      content: { type: String },
+      type: { type: String },
+      status: { type: String }, // new and seen
+      date: { type: Date },
+    },
+    notifyMeOnPost: {
+      type: Array,
+    },
   },
   {
     timestamps: true,
