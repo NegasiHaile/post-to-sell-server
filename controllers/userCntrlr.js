@@ -253,13 +253,14 @@ const userCntrlr = {
   // Refresh token
   refreshToken: (req, res) => {
     try {
-      const rf_token = req.cookies.refreshtoken;
+      // const rf_token = req.cookies.refreshtoken;
+      const rf_token = req.body.token;
+      console.log("token :- " + rf_token);
       if (!rf_token)
         return res.status(400).json({ msg: "Please Login or Register" });
 
       jwt.verify(rf_token, process.env.REFRESH_TOKEN_SECRET, (error, user) => {
-        if (error)
-          return res.status(400).json({ msg: "Please Login or Register" });
+        if (error) return res.status(400).json({ msg: "Unathorized token!" });
 
         const accesstoken = createAccessToken({ id: user.id });
 
