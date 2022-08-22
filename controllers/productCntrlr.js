@@ -1,4 +1,6 @@
 const Products = require("../models/productModel");
+const Users = require("../models/userModel");
+const { v4: uuidv4 } = require("uuid");
 const fs = require("fs");
 
 const productCntrlr = {
@@ -8,9 +10,10 @@ const productCntrlr = {
       if (files.length > 0 && files.length <= 5) {
         const {
           productName,
-          brand,
           category,
           subCategory,
+          brand,
+          model,
           price,
           currentPrice,
           discription,
@@ -29,9 +32,10 @@ const productCntrlr = {
         const newProduct = new Products({
           userId: req.user.id,
           productName,
-          brand,
           category,
           subCategory,
+          brand,
+          model,
           price,
           currentPrice,
           discription,
@@ -265,11 +269,14 @@ const productCntrlr = {
           { new: true }
         );
         res.json({ data: updatedData, msg: "Payment done!" });
+
+        await prepareScheduleNotification(updatedData);
       }
     } catch (error) {
       res.status(500).json({ msg: error.message });
     }
   },
+
   // Approve product:- Means the product content is formal, And it can be seen in the public products list
   approveProduct: async (req, res) => {
     try {
@@ -301,6 +308,158 @@ const productCntrlr = {
       res.status(500).json({ msg: error.message });
     }
   },
+
+  // Check products expairation date Push notification to a user account
+  checkProductsExpirationDate: async () => {
+    try {
+      // Step  1: Get all products their post fee payment is in the next 5 days
+      var nextFiveDays = new Date(
+        new Date().getTime() + 5 * 24 * 60 * 60 * 1000
+      );
+
+      const soonExpairingProducts = await Products.find({
+        postExpireDate: { $lte: nextFiveDays },
+      });
+
+      soonExpairingProducts.forEach(async (product) => {
+        const leftDays = differenceInTwoDates(
+          product.postExpireDate,
+          new Date()
+        );
+        console.log("leftDays " + leftDays);
+        console.log("soonExpairingProducts " + soonExpairingProducts.length);
+
+        // Notification detail
+        var notification = {
+          id: uuidv4(),
+          title: "",
+          content: "",
+          type: "",
+          status: "",
+          date: new Date(),
+        };
+
+        if (leftDays <= 0) {
+          // Delete product form the database and push notification
+
+          for (let i = 0; i < product.images.length; i++) {
+            // Deleting product images
+            await removeImage(product.images[i]);
+          }
+
+          // Deleting product detail
+          await Products.findOneAndDelete({ _id: product._id });
+
+          // Pushing notification to the user
+          notification = {
+            ...notification,
+            title: "Your product is deleted!",
+            content:
+              "Your products named as " +
+              product.productName +
+              " is deleted from our database permanently!",
+            type: "expair",
+            status: "new",
+          };
+          pushNotificationToUser(notification, product.userId);
+        }
+
+        if (leftDays == 1) {
+          // Push notification that this product has left only one day
+          notification = {
+            ...notification,
+            title: "Your product will deleted tomorrow!",
+            content:
+              "Your products named as " +
+              product.productName +
+              " will be deleted tomorrow from our database permanently, Please repay today!" +
+              `${formatDate(
+                new Date(new Date().getTime() + 1 * 24 * 60 * 60 * 1000)
+              )}`,
+            type: "expir",
+            status: "new",
+          };
+          pushNotificationToUser(notification, product.userId);
+        }
+
+        if (leftDays == 3) {
+          // Push notification that this product has left only Three days
+          notification = {
+            ...notification,
+            title: "Your product will expir in 3 days!",
+            content:
+              "Your products named as " +
+              product.productName +
+              " will be expired in the next 3 days, Please repay before " +
+              `${formatDate(
+                new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000)
+              )}`,
+            type: "expir",
+            status: "new",
+          };
+          pushNotificationToUser(notification, product.userId);
+        }
+
+        if (leftDays == 5) {
+          // Push notification that this product has left only five days
+          notification = {
+            ...notification,
+            title: "Your product will expir in 5 days!",
+            content:
+              "Your products named as " +
+              product.productName +
+              " will be expired in the next 5 days, Please repay before " +
+              formatDate(nextFiveDays),
+            type: "expir",
+            status: "new",
+          };
+          pushNotificationToUser(notification, product.userId);
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+};
+
+const prepareScheduleNotification = async (productDetail) => {
+  const scheduledNotification = await Users.find({
+    $or: [
+      { notifyMeOnPost: productDetail?.category },
+      { notifyMeOnPost: productDetail?.subCategory },
+      { notifyMeOnPost: productDetail?.brand },
+      { notifyMeOnPost: productDetail?.model },
+    ],
+  });
+
+  // Iterate over the users which shedules notification schedule
+  scheduledNotification.forEach(async (user) => {
+    const notification = {
+      id: uuidv4(),
+      title: "A product of your favorite is  posted!",
+      content:
+        "A product with a name of " +
+        productDetail?.productName +
+        " is posted for sell on " +
+        formatDate(productDetail?.createdAt) +
+        ".",
+      type: "post",
+      status: "new",
+      link: `/product/${productDetail._id}`,
+      date: new Date(),
+    };
+
+    // Push notification
+    pushNotificationToUser(notification, user._id);
+  });
+};
+
+const pushNotificationToUser = async (notification, userId) => {
+  await Users.findOneAndUpdate(
+    { _id: userId },
+    { $push: { notifications: { $each: [notification], $position: 0 } } }
+  );
+  console.log("Notification pushed successfully to user with id: " + userId);
 };
 
 // This function checks who is allowed to delte the product (the owner and the admin)
@@ -353,4 +512,17 @@ const removeImage = async (imagesPath) => {
   });
 };
 
+const differenceInTwoDates = (LargerDate, smallerDate) => {
+  // Time difference between in the dates interval
+  const differenceInTime = LargerDate.getTime() - smallerDate.getTime();
+
+  // Converting the difference in time to days
+  const DifferenceInDays = Math.ceil(differenceInTime / (1000 * 3600 * 24));
+
+  return DifferenceInDays;
+};
+
+const formatDate = (date) => {
+  return date.toLocaleDateString("en-US");
+};
 module.exports = productCntrlr;

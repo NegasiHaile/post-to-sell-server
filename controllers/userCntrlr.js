@@ -233,7 +233,7 @@ const userCntrlr = {
       );
       res.json({ msg: "Account has been disabled successfuly!" });
     } catch (error) {
-      res.status(500).json({ meg: error.message });
+      res.status(500).json({ msg: error.message });
     }
   },
   // Acitvate uer account
@@ -247,9 +247,61 @@ const userCntrlr = {
       );
       res.json({ msg: "Account has been activated successfuly!" });
     } catch (error) {
-      res.status(500).json({ meg: error.message });
+      res.status(500).json({ msg: error.message });
     }
   },
+
+  // Schedule notification
+  scheduleNotification: async (req, res) => {
+    try {
+      const updatedUser = await Users.findOneAndUpdate(
+        { _id: req.params.userId },
+        {
+          $push: {
+            notifyMeOnPost: {
+              $each: [req.body.notificationTarget],
+              $position: 0,
+            },
+          },
+        },
+        { new: true }
+      );
+      res.json({ profile: updatedUser, msg: "Notification scheduled!" });
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  },
+
+  // Update user notification status
+  updateNotificationStatusToSeen: async (req, res) => {
+    try {
+      const updatedProfile = await Users.findOneAndUpdate(
+        { _id: req.params.userId, "notifications.status": "new" },
+
+        // Positional operator $ is a placeholder for the first matching array element
+        { $set: { "notifications.$.status": "seen" } }
+      );
+      console.log(updatedProfile?.email + " Notifications updated!");
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+  // Delete user notifications from
+  deleteNotification: async (req, res) => {
+    try {
+      await Users.findOneAndUpdate(
+        { _id: req.params.userId },
+        { $pull: { notifications: { id: req.body.notificationId } } }
+      );
+      res.json({
+        msg: "Notification removed successfully!",
+      });
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  },
+
   // Refresh token
   refreshToken: (req, res) => {
     try {
@@ -272,7 +324,7 @@ const userCntrlr = {
   },
 };
 const createAccessToken = (userId) => {
-  return jwt.sign(userId, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1d" });
+  return jwt.sign(userId, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "5d" });
 };
 const createRefreshToken = (userId) => {
   return jwt.sign(userId, process.env.REFRESH_TOKEN_SECRET, {

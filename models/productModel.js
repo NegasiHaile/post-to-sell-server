@@ -24,7 +24,6 @@ const productSchema = new mongoose.Schema(
     },
     productName: {
       type: String,
-      required: true,
       trim: true,
     },
     price: {
@@ -57,7 +56,7 @@ const productSchema = new mongoose.Schema(
     },
     postExpireDate: {
       type: Date,
-      default: new Date(),
+      default: new Date().getTime() + 5 * 24 * 60 * 60 * 1000,
     },
     status: {
       type: String,
