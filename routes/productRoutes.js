@@ -10,6 +10,7 @@ router.post(
   productCntrlr.addProduct
 );
 router.get("/list/all", productCntrlr.getAllProducts);
+router.get("/list/all/active", productCntrlr.getOnlyActiveProducts);
 router.get("/list/all/featured", productCntrlr.getAllFeaturedProducts);
 router.get(
   "/list/all/user/:id",
@@ -33,12 +34,22 @@ router.put(
 router.delete(
   "/delete/:id",
   Auth(["admin", "user"]),
-  productCntrlr.deleteProduct
+  productCntrlr.deleteProduct(["admin", "user"])
 );
 router.put(
   "/delete/image/:id",
   Auth(["user"]),
   productCntrlr.deleteProductImage
 );
+router.put(
+  "/payment/update_status/:id",
+  Auth(["user"]),
+  productCntrlr.updateProductPaymentStatus
+);
+// Approve product
+router.put("/approve/:id", Auth(["admin"]), productCntrlr.approveProduct);
+
+// Achive product
+router.put("/archive/:id", Auth(["admin"]), productCntrlr.archiveProduct);
 
 module.exports = router;

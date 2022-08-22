@@ -5,31 +5,28 @@ const categoryCntrlr = {
   // Add new  products category
   addCategory: async (req, res) => {
     try {
-      const { category, subCategory, description } = req.body;
+      const { category, subCategory, description, postFee, featuredPostFee } =
+        req.body;
       const existingCategory = await Categories.findOne({ category: category });
       if (existingCategory) {
-        await removeCategoryImage(
-          "uploads/products/categories/" + req.file.filename
-        );
         return res.status(400).json({ msg: "Category exist!" });
       } else {
         const newCategory = new Categories({
           category,
           subCategory,
           description,
-          categoryImage: "uploads/products/categories/" + req.file.filename,
+          postFee,
+          featuredPostFee,
+          categoryImage: "uploads/products/categories/",
         });
         await newCategory.save();
-        res.json({ msg: "Category added successfuly!" });
+        res.json({ msg: "Category added successfuly!", detail: newCategory });
       }
     } catch (error) {
-      await removeCategoryImage(
-        "uploads/products/categories/" + req.file.filename
-      );
       res.status(500).json({ msg: error.message });
     }
   },
-  // Fetch alla categories
+  // Fetch all categories
   getCategories: async (req, res) => {
     res.json(await Categories.find());
   },
@@ -43,7 +40,8 @@ const categoryCntrlr = {
         return res.status(400).json({ msg: "Category not found!" });
       await Categories.findOneAndUpdate(
         { _id: req.params.id },
-        ({ category, subCategory, description } = req.body)
+        ({ category, subCategory, postFee, featuredPostFee, description } =
+          req.body)
       );
 
       res.json({ msg: "Category edited successfuly!" });

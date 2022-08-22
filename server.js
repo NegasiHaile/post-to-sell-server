@@ -1,9 +1,11 @@
 require("dotenv").config();
+const userCntrlr = require("./controllers/productCntrlr");
 const express = require("express");
 const path = require("path");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const schedule = require("node-schedule");
 
 const app = express();
 
@@ -36,4 +38,14 @@ app.use("/api/banners", require("./routes/bannerRouters"));
 const PORT = process.env.PORT || 5055;
 app.listen(PORT, () => {
   console.log("Server is runnig on port ", PORT);
+});
+
+// Recurrently run the schedule at the specified time date rule bellow
+const rule = new schedule.RecurrenceRule();
+rule.dayOfWeek = [new schedule.Range(0, 6)];
+rule.hour = 23;
+rule.minute = 00;
+
+const job = schedule.scheduleJob(rule, async (fireDate) => {
+  userCntrlr.checkProductsExpirationDate();
 });

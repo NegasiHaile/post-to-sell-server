@@ -6,16 +6,6 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    productName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    brand: {
-      type: String,
-      required: true,
-      trim: true,
-    },
     category: {
       type: String,
       required: true,
@@ -25,13 +15,22 @@ const productSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    brand: {
+      type: String,
+      trim: true,
+    },
+    model: {
+      type: String,
+    },
+    productName: {
+      type: String,
+      trim: true,
+    },
     price: {
       type: Number,
-      required: true,
     },
     currentPrice: {
       type: Number,
-      required: true,
     },
     discription: {
       type: String,
@@ -42,16 +41,6 @@ const productSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    tag: {
-      type: String,
-      trim: true,
-    },
-    sizes: {
-      type: Array,
-    },
-    colors: {
-      type: Array,
-    },
     images: {
       type: Array,
       required: true,
@@ -60,18 +49,19 @@ const productSchema = new mongoose.Schema(
       type: Object,
       required: true,
     },
-    reactions: {
-      type: Array,
-    },
-    rate: {
+    postPayment: {
       type: Number,
       required: true,
       default: 0,
     },
-    postPayment: {
+    postExpireDate: {
+      type: Date,
+      default: new Date().getTime() + 5 * 24 * 60 * 60 * 1000,
+    },
+    status: {
       type: String,
       required: true,
-      default: "1",
+      default: "new", // values: new, active or archived
     },
   },
   {

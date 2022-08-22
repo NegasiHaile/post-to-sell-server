@@ -35,6 +35,11 @@ const addSchema = new mongoose.Schema(
       required: true,
       default: true,
     },
+    status: {
+      type: String,
+      required: true,
+      default: "active", // values: New, active or archived
+    },
   },
   { timestamps: true }
 );

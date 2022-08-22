@@ -80,28 +80,68 @@ const advertCntrlr = {
       res.status(500).json({ msg: error.message });
     }
   },
-  deleteAdvert: async (req, res) => {
+
+  deleteAdvert: (permissions) => {
+    return async (req, res) => {
+      try {
+        const validUser = await validatAdvertOwner(
+          req.user.id,
+          req.params.id,
+          permissions
+        );
+
+        if (!validUser)
+          return res.status(400).json({ msg: "Perimission denied!" });
+
+        const advert = await Adverts.findById({ _id: req.params.id });
+        await removeAdvetBanner(advert.advertBanner);
+        await Adverts.findOneAndDelete({ _id: req.params.id });
+        res.json({ msg: "Advert deleted successfuly!" });
+      } catch (error) {
+        res.status(500).json({ msg: error.message });
+      }
+    };
+  },
+
+  // Approve Advert:- Means the Advert content is formal, And it can be seen in the public adverts list
+  approveAdvert: async (req, res) => {
     try {
-      const validUser = await validatAdvertOwner(req.user.id, req.params.id);
+      const updatedData = await Adverts.findOneAndUpdate(
+        { _id: req.params.id },
+        {
+          status: "active",
+        },
+        { new: true }
+      );
+      res.json({ data: updatedData, msg: "Advert approved successfully!" });
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  },
 
-      if (!validUser)
-        return res.status(400).json({ msg: "Perimission denied!" });
-
-      const advert = await Adverts.findById({ _id: req.params.id });
-      await removeAdvetBanner(advert.advertBanner);
-      await Adverts.findOneAndDelete({ _id: req.params.id });
-      res.json({ msg: "Advert deleted successfuly!" });
+  // Archive advert:- Means the Advert will not be display in the public page any more, But exitst in the database
+  archiveAdvert: async (req, res) => {
+    try {
+      const updatedData = await Adverts.findOneAndUpdate(
+        { _id: req.params.id },
+        {
+          status: "archived",
+        },
+        { new: true }
+      );
+      res.json({ data: updatedData, msg: "Advert archived successfully!" });
     } catch (error) {
       res.status(500).json({ msg: error.message });
     }
   },
 };
-const validatAdvertOwner = async (userId, advertId) => {
-  // Check which user is trying to take this action And,
-  // Allow only the owner of the advert for this action
+
+// Check which user is trying to take this action And,
+// Allow only the owner of the advert and the admin for this action
+const validatAdvertOwner = async (userId, advertId, permissions) => {
   const advert = await Adverts.findById(advertId);
   if (advert) {
-    if (advert.userId === userId) {
+    if (advert.userId === userId || permissions?.includes("admin")) {
       return true;
     } else {
       return false;

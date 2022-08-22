@@ -109,11 +109,15 @@ const userCntrlr = {
   // Edit user detail
   editUser: async (req, res) => {
     try {
-      await Users.findOneAndUpdate(
+      const updatedData = await Users.findOneAndUpdate(
         { _id: req.params.id },
-        ({ fName, lName, email, phone, contacts } = req.body)
+        ({ fName, lName, email, phone, contacts } = req.body),
+        { new: true }
       );
-      res.json({ msg: "User datail edited successfuly!" });
+      res.json({
+        updated: updatedData,
+        msg: "User datail edited successfuly!",
+      });
     } catch (error) {
       res.status(500).json({ meg: error.msg });
     }
@@ -192,6 +196,32 @@ const userCntrlr = {
       return res.status(500).json({ msg: err.message });
     }
   },
+  // Change user password
+  changeMypassword: async (req, res) => {
+    try {
+      // password encryption
+      const hashedNewPassword = await bcrypt.hash(req.body.newPassword, 10);
+
+      // Get the existing used data
+      const existingData = await Users.findById(req.user.id);
+      // compare the old password in database and that coming from user
+      const passwordMatch = await bcrypt.compare(
+        req.body.oldPassword,
+        existingData.password
+      );
+      if (!passwordMatch)
+        return res.status(400).json({ msg: "Incorrect old password!" });
+
+      await Users.findOneAndUpdate(
+        { _id: req.user.id },
+        { password: hashedNewPassword }
+      );
+      res.json({ msg: "Password changed successfully!" });
+    } catch (error) {
+      return res.status(500).json({ msg: err.message });
+    }
+  },
+
   // Blocking user account
   blockUserAccount: async (req, res) => {
     try {
@@ -203,7 +233,7 @@ const userCntrlr = {
       );
       res.json({ msg: "Account has been disabled successfuly!" });
     } catch (error) {
-      res.status(500).json({ meg: error.message });
+      res.status(500).json({ msg: error.message });
     }
   },
   // Acitvate uer account
@@ -217,19 +247,72 @@ const userCntrlr = {
       );
       res.json({ msg: "Account has been activated successfuly!" });
     } catch (error) {
-      res.status(500).json({ meg: error.message });
+      res.status(500).json({ msg: error.message });
     }
   },
+
+  // Schedule notification
+  scheduleNotification: async (req, res) => {
+    try {
+      const updatedUser = await Users.findOneAndUpdate(
+        { _id: req.params.userId },
+        {
+          $push: {
+            notifyMeOnPost: {
+              $each: [req.body.notificationTarget],
+              $position: 0,
+            },
+          },
+        },
+        { new: true }
+      );
+      res.json({ profile: updatedUser, msg: "Notification scheduled!" });
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  },
+
+  // Update user notification status
+  updateNotificationStatusToSeen: async (req, res) => {
+    try {
+      const updatedProfile = await Users.findOneAndUpdate(
+        { _id: req.params.userId, "notifications.status": "new" },
+
+        // Positional operator $ is a placeholder for the first matching array element
+        { $set: { "notifications.$.status": "seen" } }
+      );
+      console.log(updatedProfile?.email + " Notifications updated!");
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+  // Delete user notifications from
+  deleteNotification: async (req, res) => {
+    try {
+      await Users.findOneAndUpdate(
+        { _id: req.params.userId },
+        { $pull: { notifications: { id: req.body.notificationId } } }
+      );
+      res.json({
+        msg: "Notification removed successfully!",
+      });
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  },
+
   // Refresh token
   refreshToken: (req, res) => {
     try {
-      const rf_token = req.cookies.refreshtoken;
+      // const rf_token = req.cookies.refreshtoken;
+      const rf_token = req.body.token;
+      console.log("token :- " + rf_token);
       if (!rf_token)
         return res.status(400).json({ msg: "Please Login or Register" });
 
       jwt.verify(rf_token, process.env.REFRESH_TOKEN_SECRET, (error, user) => {
-        if (error)
-          return res.status(400).json({ msg: "Please Login or Register" });
+        if (error) return res.status(400).json({ msg: "Unathorized token!" });
 
         const accesstoken = createAccessToken({ id: user.id });
 
@@ -241,7 +324,7 @@ const userCntrlr = {
   },
 };
 const createAccessToken = (userId) => {
-  return jwt.sign(userId, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1d" });
+  return jwt.sign(userId, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "5d" });
 };
 const createRefreshToken = (userId) => {
   return jwt.sign(userId, process.env.REFRESH_TOKEN_SECRET, {

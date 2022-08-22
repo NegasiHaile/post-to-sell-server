@@ -29,15 +29,40 @@ router.post("/signin", userCntrlr.signIn);
 // Get profile
 router.get("/profile", Auth(["admin", "user"]), userCntrlr.getProfile);
 
+// Change password
+router.put("/change_my_password", Auth(["user"]), userCntrlr.changeMypassword);
+
 // Blocloking and Activeting uses account
 router.put(
   "/activate_account/:id",
   Auth(["admin"]),
   userCntrlr.activateUserAccount
 );
+
+// Block user account
 router.put("/block_account/:id", Auth(["admin"]), userCntrlr.blockUserAccount);
 
+// Schedule notification
+router.put(
+  "/schedule_notification/:userId",
+  Auth(["user"]),
+  userCntrlr.scheduleNotification
+);
+
+// Update user notifications to seen
+router.put(
+  "/update_notification_status/:userId",
+  Auth(["user"]),
+  userCntrlr.updateNotificationStatusToSeen
+);
+
+// delete user notification
+router.put(
+  "/delete_notification/:userId",
+  Auth(["user"]),
+  userCntrlr.deleteNotification
+);
 // Refresh token
-router.get("/refresh_token", userCntrlr.refreshToken);
+router.post("/refresh_token", userCntrlr.refreshToken);
 
 module.exports = router;
